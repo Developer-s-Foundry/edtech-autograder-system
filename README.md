@@ -269,6 +269,15 @@ npm run dev
 
 ---
 
+### 4 Database Migration
+```
+alembic init alembic
+alembic revision --autogenerate -m "Initial migration"
+alembic upgrade head
+```
+
+---
+
 ## Scalability Design
 
 This system demonstrates:
