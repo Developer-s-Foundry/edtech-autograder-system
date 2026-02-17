@@ -1,6 +1,6 @@
 
 # EdTech Autograder System
-**Required Python Version: 3.8.10**
+**Required Python Version: 3.10+**
 
 
 A scalable, asynchronous autograder platform for programming assignments built with **FastAPI, Celery, Redis, PostgreSQL, React, and Judge0**.
@@ -176,7 +176,7 @@ cd edtech-autograder-system
 
 ### Ensure Python Version
 
-This project requires **Python 3.8.10**.
+This project requires **Python 3.10+**.
 
 Verify your installed version:
 
@@ -187,23 +187,21 @@ python --version
 It must return:
 
 ```
-Python 3.8.10
+Python 3.10.x
 ```
 
 If you are using `pyenv`:
 
 ```
-pyenv install 3.8.10
-pyenv local 3.8.10
+pyenv install 3.10
+pyenv local 3.10
 ```
-
-If Python 3.8.10 is not installed, install it before proceeding.
 
 ---
 
 ### Create Virtual Environment
 
-Create the virtual environment using Python 3.8.10:
+Create the virtual environment using Python 3.10:
 
 ```
 python -m venv venv
@@ -225,7 +223,7 @@ source venv/bin/activate
 
 ### Install Dependencies
 
-⚠️ Ensure the virtual environment was created using Python 3.8.10 before installing dependencies.
+⚠️ Ensure the virtual environment was created using Python 3.10+ before installing dependencies.
 
 ```
 pip install -r requirements.txt
@@ -267,6 +265,15 @@ celery -A app.celery_app worker --loglevel=info
 cd frontend
 npm install
 npm run dev
+```
+
+---
+
+### 4 Database Migration
+```
+alembic init alembic
+alembic revision --autogenerate -m "Initial migration"
+alembic upgrade head
 ```
 
 ---
