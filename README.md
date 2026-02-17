@@ -1,5 +1,7 @@
 
 # EdTech Autograder System
+**Required Python Version: 3.8.10**
+
 
 A scalable, asynchronous autograder platform for programming assignments built with **FastAPI, Celery, Redis, PostgreSQL, React, and Judge0**.
 
@@ -170,15 +172,68 @@ cd edtech-autograder-system
 
 ---
 
-### 2️⃣ Backend Setup
+## 2️⃣ Backend Setup
 
-Create virtual environment and install dependencies:
+### Ensure Python Version
+
+This project requires **Python 3.8.10**.
+
+Verify your installed version:
+
+```
+python --version
+```
+
+It must return:
+
+```
+Python 3.8.10
+```
+
+If you are using `pyenv`:
+
+```
+pyenv install 3.8.10
+pyenv local 3.8.10
+```
+
+If Python 3.8.10 is not installed, install it before proceeding.
+
+---
+
+### Create Virtual Environment
+
+Create the virtual environment using Python 3.8.10:
+
+```
+python -m venv venv
+```
+
+---
+
+### Activate Virtual Environment
+
+```
+# Windows
+venv\Scripts\activate 
+
+# macOS/Linux
+source venv/bin/activate
+```
+
+---
+
+### Install Dependencies
+
+⚠️ Ensure the virtual environment was created using Python 3.8.10 before installing dependencies.
 
 ```
 pip install -r requirements.txt
 ```
 
-Configure environment variables:
+---
+
+### Configure Environment Variables
 
 ```
 DATABASE_URL=
@@ -188,13 +243,17 @@ JUDGE0_BASE_URL=
 JUDGE0_API_KEY=
 ```
 
-Run API:
+---
+
+### Run API
 
 ```
 uvicorn app.main:app --reload
 ```
 
-Start Celery worker:
+---
+
+### Start Celery Worker
 
 ```
 celery -A app.celery_app worker --loglevel=info
