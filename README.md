@@ -231,7 +231,7 @@ pip install -r requirements.txt
 
 ---
 
-### Configure Environment Variables
+### Configure Environment Variables by using the `.env.example` file as a template. Create a `.env` file in the root directory with the following content:
 
 ```
 DATABASE_URL=
