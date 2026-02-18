@@ -26,7 +26,10 @@
       <td>{{ a.title }}</td>
       <td>{{ a.language }}</td>
       <td>{{ a.is_published }}</td>
-      <td><a href="/web/instructor/assignments/{{ a.id }}/edit">Edit</a></td>
+      <td>
+        <a href="/web/instructor/assignments/{{ a.id }}/edit">Edit</a> |
+        <a href="/web/instructor/assignments/{{ a.id }}/io-tests">IO Tests</a>
+      </td>
     </tr>
     {% endfor %}
   </table>
