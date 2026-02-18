@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Dashboard</h2>
+
+<p>Signed in as: <b>{{ user.email }}</b></p>
+<p>Your role: <b>{{ user.role }}</b></p>
+
+<div class="grid">
+  <a class="btn" href="/student-area">Student area</a>
+  <a class="btn" href="/instructor-area">Instructor area</a>
+</div>
+{% endblock %}

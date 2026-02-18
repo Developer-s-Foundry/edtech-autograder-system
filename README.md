@@ -239,16 +239,46 @@ REDIS_URL=
 CELERY_BROKER_URL=
 JUDGE0_BASE_URL=
 JUDGE0_API_KEY=
+JWT_SECRET_KEY=
+JWT_ALGORITHM=HS256
+JWT_ACCESS_TOKEN_EXPIRE_MINUTES=30
+JWT_REFRESH_TOKEN_EXPIRE_DAYS=7
 ```
 
 ---
+
+### Database Migration
+
+```
+alembic init alembic
+alembic revision --autogenerate -m "Initial migration"
+alembic upgrade head
+```
+
+--- 
+
+### Seed Demo Data (Optional)
+
+```bash
+python scripts/seed.py
+```
+
+This creates data into all tables; 3 demo users,1 assignments, 
+3 IO test cases, 1 Unit test spec, and 1 static rules config (password for all: `demo_password_123`):
+
+| Email | Role |
+|-------|------|
+| `instructor.demo@autograder.local` | instructor |
+| `student1.demo@autograder.local` | student |
+| `student2.demo@autograder.local` | student |
+
 
 ### Run API
 
 ```
 uvicorn app.main:app --reload
 ```
-
+The API will be available at `http://127.0.0.1:8000`.
 ---
 
 ### Start Celery Worker
@@ -266,16 +296,6 @@ cd frontend
 npm install
 npm run dev
 ```
-
----
-
-### 4 Database Migration
-```
-alembic init alembic
-alembic revision --autogenerate -m "Initial migration"
-alembic upgrade head
-```
-
 ---
 
 ## Scalability Design

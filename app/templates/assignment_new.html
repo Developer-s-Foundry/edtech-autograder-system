@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Create Assignment</h2>
+
+{% if error %}
+  <div class="error">{{ error }}</div>
+{% endif %}
+
+<form method="post">
+  <label>Title</label>
+  <input name="title" required />
+
+  <label>Description</label>
+  <textarea name="description" required></textarea>
+
+  <label>Instructions</label>
+  <textarea name="instructions"></textarea>
+
+  <label>Language</label>
+  <input name="language" value="python" />
+
+  <label>Published</label>
+  <select name="is_published">
+    <option value="false" selected>false</option>
+    <option value="true">true</option>
+  </select>
+
+  <h3>Grading weights (must sum to 100)</h3>
+  <label>IO weight</label>
+  <input name="weight_io" type="number" value="70" />
+
+  <label>Unit weight</label>
+  <input name="weight_unit" type="number" value="20" />
+
+  <label>Static weight</label>
+  <input name="weight_static" type="number" value="10" />
+
+  <h3>Limits</h3>
+  <label>Max runtime (ms)</label>
+  <input name="max_runtime_ms" type="number" value="2000" />
+
+  <label>Max memory (kb)</label>
+  <input name="max_memory_kb" type="number" value="128000" />
+
+  <button type="submit">Create</button>
+</form>
+{% endblock %}

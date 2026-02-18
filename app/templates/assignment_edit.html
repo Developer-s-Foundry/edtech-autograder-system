@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Edit Assignment (ID: {{ assignment.id }})</h2>
+
+{% if error %}
+  <div class="error">{{ error }}</div>
+{% endif %}
+
+<form method="post">
+  <label>Title</label>
+  <input name="title" value="{{ assignment.title }}" required />
+
+  <label>Description</label>
+  <textarea name="description" required>{{ assignment.description }}</textarea>
+
+  <label>Instructions</label>
+  <textarea name="instructions">{{ assignment.instructions or "" }}</textarea>
+
+  <label>Language</label>
+  <input name="language" value="{{ assignment.language }}" />
+
+  <label>Published</label>
+  <select name="is_published">
+    <option value="false" {% if not assignment.is_published %}selected{% endif %}>false</option>
+    <option value="true" {% if assignment.is_published %}selected{% endif %}>true</option>
+  </select>
+
+  <h3>Grading weights (must sum to 100)</h3>
+  <label>IO weight</label>
+  <input name="weight_io" type="number" value="{{ assignment.weight_io }}" />
+
+  <label>Unit weight</label>
+  <input name="weight_unit" type="number" value="{{ assignment.weight_unit }}" />
+
+  <label>Static weight</label>
+  <input name="weight_static" type="number" value="{{ assignment.weight_static }}" />
+
+  <h3>Limits</h3>
+  <label>Max runtime (ms)</label>
+  <input name="max_runtime_ms" type="number" value="{{ assignment.max_runtime_ms }}" />
+
+  <label>Max memory (kb)</label>
+  <input name="max_memory_kb" type="number" value="{{ assignment.max_memory_kb }}" />
+
+  <button type="submit">Save changes</button>
+</form>
+{% endblock %}

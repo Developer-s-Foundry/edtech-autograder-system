@@ -71,3 +71,11 @@ def require_role(*allowed_roles: str):
         return current_user
 
     return role_checker
+
+
+# -----------------------------
+# Ticket 2.1 Deliverables
+# -----------------------------
+# Convenience dependencies built on top of require_role
+require_student = require_role("student")
+require_instructor = require_role("instructor")
