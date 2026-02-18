@@ -339,7 +339,7 @@ This project was developed as a capstone-level system to demonstrate:
 
 * [Chima Enyeribe](https://github.com/JasperZeroes)
 * [Aisha](https://github.com/)
-* [Oluwatobiloba Okunobgbe](https://github.com/JesseGreat)
+* [Oluwatobiloba Okunogbe](https://github.com/JesseGreat)
 
 ---
 
