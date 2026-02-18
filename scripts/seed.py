@@ -28,6 +28,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.append(str(ROOT))
 
 from sqlalchemy import select
+from passlib.context import CryptContext
 from app.db import SessionLocal
 from app.models.models import User, Assignment, IOTestCase, UnitTestSpec, StaticRule
 
@@ -39,8 +40,9 @@ INSTRUCTOR_EMAIL = "instructor.demo@autograder.local"
 STUDENT1_EMAIL = "student1.demo@autograder.local"
 STUDENT2_EMAIL = "student2.demo@autograder.local"
 
-# NOTE: for demo only. Real system will hash passwords properly.
-DEMO_PASSWORD_HASH = "demo_hash_not_real"
+_pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+DEMO_PASSWORD = "demo_password_123"
+DEMO_PASSWORD_HASH = _pwd_context.hash(DEMO_PASSWORD)
 
 ASSIGNMENT_TITLE = "MVP Demo - Add Two Numbers"
 ASSIGNMENT_DESCRIPTION = (
