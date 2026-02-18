@@ -222,7 +222,8 @@ class Submission(Base):
     assignment: Mapped["Assignment"] = relationship("Assignment", back_populates="submissions")
     student: Mapped["User"] = relationship("User", back_populates="submissions")
 
-    grading_runs: Mapped[list["GradingRun"]] = relationship("GradingRun", back_populates="submission")
+    grading_runs: Mapped[list["GradingRun"]] = relationship("GradingRun", 
+                    back_populates="submission", foreign_keys="[GradingRun.submission_id]",)
 
     latest_grading_run: Mapped["GradingRun | None"] = relationship(
         "GradingRun",
@@ -264,7 +265,8 @@ class GradingRun(Base):
 
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
-    submission: Mapped["Submission"] = relationship("Submission", back_populates="grading_runs")
+    submission: Mapped["Submission"] = relationship("Submission", back_populates="grading_runs",
+                                                    foreign_keys=[submission_id],)
     test_case_results: Mapped[list["TestCaseResult"]] = relationship("TestCaseResult", back_populates="grading_run")
     static_analysis_report: Mapped["StaticAnalysisReport | None"] = relationship(
         "StaticAnalysisReport",
