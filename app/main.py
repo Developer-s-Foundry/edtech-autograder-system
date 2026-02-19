@@ -21,6 +21,8 @@ from app.routers.web_instructor_static_rules import router as web_instructor_sta
 from app.routers.student_assignments import router as student_assignments_router
 from app.routers.web_instructor_publish import router as web_instructor_publish_router
 from app.routers.web_student_dashboard import router as web_student_dashboard_router
+from app.routers.web_student_assignments import router as web_student_assignments_router
+
 
 
 settings = get_settings()
@@ -47,5 +49,7 @@ app.include_router(web_instructor_static_rules_router)
 app.include_router(student_assignments_router)
 app.include_router(web_instructor_publish_router)
 app.include_router(web_student_dashboard_router)
+app.include_router(web_student_assignments_router)
+
 
 

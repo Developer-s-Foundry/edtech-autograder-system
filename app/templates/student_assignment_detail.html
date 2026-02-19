@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>{{ assignment.title }}</h2>
+
+<p><b>Language:</b> {{ assignment.language }}</p>
+
+<h3>Description</h3>
+<p style="white-space: pre-wrap;">{{ assignment.description }}</p>
+
+{% if assignment.instructions %}
+<h3>Instructions</h3>
+<p style="white-space: pre-wrap;">{{ assignment.instructions }}</p>
+{% endif %}
+
+<h3>Grading Weights</h3>
+<ul>
+  <li>IO: {{ assignment.weight_io }}%</li>
+  <li>Unit: {{ assignment.weight_unit }}%</li>
+  <li>Static: {{ assignment.weight_static }}%</li>
+</ul>
+
+<h3>Limits</h3>
+<ul>
+  <li>Max runtime: {{ assignment.max_runtime_ms }} ms</li>
+  <li>Max memory: {{ assignment.max_memory_kb }} kb</li>
+</ul>
+
+<p><a href="/web/student/dashboard">Back to Dashboard</a></p>
+{% endblock %}
