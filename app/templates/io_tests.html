@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>IO Test Cases - Assignment {{ assignment_id }}</h2>
+
+{% if error %}
+  <div class="error">{{ error }}</div>
+{% endif %}
+
+<form method="post" action="/web/instructor/assignments/{{ assignment_id }}/io-tests">
+  <label>Name</label>
+  <input name="name" required />
+
+  <label>Stdin (optional)</label>
+  <textarea name="stdin"></textarea>
+
+  <label>Expected Stdout</label>
+  <textarea name="expected_stdout" required></textarea>
+
+  <label>Points</label>
+  <input name="points" type="number" value="1" min="0" />
+
+  <label>Hidden</label>
+  <select name="is_hidden">
+    <option value="true" selected>true</option>
+    <option value="false">false</option>
+  </select>
+
+  <label>Order index</label>
+  <input name="order_index" type="number" value="0" min="0" />
+
+  <button type="submit">Add Test Case</button>
+</form>
+
+<hr />
+
+<h3>Existing Test Cases</h3>
+
+{% if test_cases|length == 0 %}
+  <p class="muted">No IO test cases yet.</p>
+{% else %}
+  <table>
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+      <th>Points</th>
+      <th>Hidden</th>
+      <th>Order</th>
+      <th>Stdin</th>
+      <th>Expected</th>
+    </tr>
+    {% for t in test_cases %}
+    <tr>
+      <td>{{ t.id }}</td>
+      <td>{{ t.name }}</td>
+      <td>{{ t.points }}</td>
+      <td>{{ t.is_hidden }}</td>
+      <td>{{ t.order_index }}</td>
+      <td><pre>{{ t.stdin or "" }}</pre></td>
+      <td><pre>{{ t.expected_stdout }}</pre></td>
+    </tr>
+    {% endfor %}
+  </table>
+{% endif %}
+
+<p><a href="/web/instructor/dashboard">Back to Dashboard</a></p>
+{% endblock %}

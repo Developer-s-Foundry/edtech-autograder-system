@@ -1,0 +1,13 @@
+body { font-family: system-ui, Arial; background: #f6f7fb; margin: 0; }
+.container { max-width: 900px; margin: 0 auto; padding: 24px; }
+.topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.brand { font-weight: 700; text-decoration: none; color: #111; }
+.topbar nav a { margin-left: 12px; text-decoration: none; color: #333; }
+.card { background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 2px 16px rgba(0,0,0,0.06); }
+label { display: block; margin-top: 12px; margin-bottom: 6px; color: #222; }
+input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 10px; }
+button { margin-top: 16px; padding: 10px 14px; border: 0; border-radius: 10px; cursor: pointer; }
+.error { background: #ffe8e8; border: 1px solid #ffbdbd; padding: 10px; border-radius: 10px; margin-bottom: 12px; }
+.muted { color: #666; margin-top: 12px; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+.btn { display: block; padding: 12px; text-align: center; border-radius: 10px; border: 1px solid #ddd; text-decoration: none; color: #111; }

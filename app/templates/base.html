@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="/static/styles.css" />
+  <title>{{ title if title else "Autograder" }}</title>
+</head>
+<body>
+  <div class="container">
+    <header class="topbar">
+      <a href="/dashboard" class="brand">Autograder</a>
+      <nav>
+        <a href="/register">Register</a>
+        <a href="/login">Login</a>
+        <a href="/logout">Logout</a>
+      </nav>
+    </header>
+
+    <main class="card">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</body>
+</html>
