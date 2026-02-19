@@ -11,6 +11,9 @@ from app.routers.instructor_io_tests import router as instructor_io_tests_router
 from app.routers.web_instructor_io_tests import router as web_instructor_io_tests_router
 from app.routers.instructor_unit_tests import router as instructor_unit_tests_router
 from app.routers.web_instructor_unit_tests import router as web_instructor_unit_tests_router
+from app.routers.student_assignments import router as student_assignments_router
+from app.routers.student_submissions import router as student_submissions_router
+from app.routers.student_results import router as student_results_router
 
 
 
@@ -31,5 +34,8 @@ app.include_router(instructor_io_tests_router)
 app.include_router(web_instructor_io_tests_router)
 app.include_router(instructor_unit_tests_router)
 app.include_router(web_instructor_unit_tests_router)
+app.include_router(student_assignments_router)
+app.include_router(student_submissions_router)
+app.include_router(student_results_router)
 
 
