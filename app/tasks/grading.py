@@ -7,7 +7,6 @@ from app.models.models import Submission, SubmissionStatus
 
 logger = logging.getLogger(__name__)
 
-
 @celery_app.task(name="app.tasks.grading.grade_submission", bind=True, max_retries=3)
 def grade_submission(self, submission_id: int) -> None:
     """

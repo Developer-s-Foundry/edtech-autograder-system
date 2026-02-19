@@ -14,13 +14,14 @@ from app.routers.web_instructor_unit_tests import router as web_instructor_unit_
 from app.routers.student_assignments import router as student_assignments_router
 from app.routers.student_submissions import router as student_submissions_router
 from app.routers.student_results import router as student_results_router
-
-
 from app.routers.instructor_static_rules import router as instructor_static_rules_router
 from app.routers.web_instructor_static_rules import router as web_instructor_static_rules_router
 from app.routers.student_assignments import router as student_assignments_router
 from app.routers.web_instructor_publish import router as web_instructor_publish_router
 from app.routers.web_student_dashboard import router as web_student_dashboard_router
+from app.routers.web_student_assignments import router as web_student_assignments_router
+from app.routers.web_student_submissions import router as web_student_submissions_router
+from app.routers.web_student_results import router as web_student_results_router
 
 
 settings = get_settings()
@@ -47,5 +48,6 @@ app.include_router(web_instructor_static_rules_router)
 app.include_router(student_assignments_router)
 app.include_router(web_instructor_publish_router)
 app.include_router(web_student_dashboard_router)
-
-
+app.include_router(web_student_assignments_router)
+app.include_router(web_student_submissions_router)
+app.include_router(web_student_results_router)

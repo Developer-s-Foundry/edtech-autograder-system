@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Submission Result</h2>
+
+<p><b>Submission ID:</b> {{ result.submission_id }}</p>
+<p><b>Status:</b> {{ result.status }}</p>
+
+{% if result.status in ["queued", "running"] %}
+  <p class="muted">Grading in progress. Check again soon.</p>
+{% elif result.status == "failed" %}
+  <p class="error">Grading failed.</p>
+  {% if result.error_message %}
+    <pre style="white-space: pre-wrap;">{{ result.error_message }}</pre>
+  {% endif %}
+{% elif result.status == "completed" %}
+  <h3>Scores</h3>
+  <ul>
+    <li><b>Total:</b> {{ result.score_total }}</li>
+    <li>IO: {{ result.io_score }}</li>
+    <li>Unit: {{ result.unit_score }}</li>
+    <li>Static: {{ result.static_score }}</li>
+  </ul>
+
+  {% if result.feedback_summary %}
+    <h3>Feedback Summary</h3>
+    <pre style="white-space: pre-wrap;">{{ result.feedback_summary | tojson(indent=2) }}</pre>
+  {% endif %}
+
+  {% if result.ai_feedback %}
+    <h3>AI Feedback</h3>
+    <pre style="white-space: pre-wrap;">{{ result.ai_feedback }}</pre>
+  {% endif %}
+{% else %}
+  <p class="muted">No results available yet.</p>
+{% endif %}
+
+<p><a href="/web/student/dashboard">Back to Dashboard</a></p>
+{% endblock %}

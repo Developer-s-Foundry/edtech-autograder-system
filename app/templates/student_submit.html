@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Submit Solution - Assignment {{ assignment_id }}</h2>
+
+{% if error %}
+  <div class="error">{{ error }}</div>
+{% endif %}
+
+{% if result %}
+  <div class="success">
+    Submitted! Submission ID: <b>{{ result.submission_id }}</b> - Status: <b>{{ result.status }}</b>
+  </div>
+{% endif %}
+
+{% if result %}
+  <p>
+    <a href="/web/student/submissions/{{ result.submission_id }}">View Status</a> |
+    <a href="/web/student/submissions/{{ result.submission_id }}/result">View Result</a>
+  </p>
+{% endif %}
+
+<form method="post" enctype="multipart/form-data">
+  <label>Upload .py file (max 1MB)</label>
+  <input type="file" name="file" accept=".py" required />
+  <button type="submit">Upload</button>
+</form>
+
+<p><a href="/web/student/dashboard">Back to Dashboard</a></p>
+{% endblock %}
