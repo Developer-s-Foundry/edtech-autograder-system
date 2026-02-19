@@ -4,8 +4,11 @@
 
 <p>Signed in as: <b>{{ user.email }}</b></p>
 
-<p><a class="btn" href="/web/instructor/assignments/new">+ Create Assignment</a></p>
-
+<p>
+  <a class="btn" href="/web/instructor/assignments/new">
+    + Create Assignment
+  </a>
+</p>
 
 <h3>Your Assignments</h3>
 
@@ -20,19 +23,47 @@
       <th>Published</th>
       <th>Actions</th>
     </tr>
+
     {% for a in assignments %}
     <tr>
       <td>{{ a.id }}</td>
       <td>{{ a.title }}</td>
       <td>{{ a.language }}</td>
-      <td>{{ a.is_published }}</td>
+      <td>
+        {% if a.is_published %}
+          <span style="color:green;">Yes</span>
+        {% else %}
+          <span style="color:orange;">No</span>
+        {% endif %}
+      </td>
+
       <td>
         <a href="/web/instructor/assignments/{{ a.id }}/edit">Edit</a> |
         <a href="/web/instructor/assignments/{{ a.id }}/io-tests">IO Tests</a> |
-        <a href="/web/instructor/assignments/{{ a.id }}/unit-tests">Unit Tests</a>
+        <a href="/web/instructor/assignments/{{ a.id }}/unit-tests">Unit Tests</a> |
+        <a href="/web/instructor/assignments/{{ a.id }}/static-rules">Static Rules</a>
+
+        {% if not a.is_published %}
+          |
+          <form method="post"
+                action="/web/instructor/assignments/{{ a.id }}/publish"
+                style="display:inline;"
+                onsubmit="return confirm('Publish this assignment? Students will be able to see it and submit solutions.');">
+            <button type="submit">Publish</button>
+          </form>
+        {% else %}
+          |
+          <form method="post"
+                action="/web/instructor/assignments/{{ a.id }}/unpublish"
+                style="display:inline;"
+                onsubmit="return confirm('Unpublish this assignment? Students will no longer see it.');">
+            <button type="submit">Unpublish</button>
+          </form>
+        {% endif %}
       </td>
     </tr>
     {% endfor %}
+
   </table>
 {% endif %}
 {% endblock %}

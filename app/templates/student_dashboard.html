@@ -4,5 +4,28 @@
 
 <p>Welcome, {{ user.email }}</p>
 
-<p class="muted">Your assignments and submissions will appear here.</p>
+<h3>Published Assignments</h3>
+
+{% if assignments|length == 0 %}
+  <p class="muted">No published assignments yet.</p>
+{% else %}
+  <table>
+    <tr>
+      <th>ID</th>
+      <th>Title</th>
+      <th>Language</th>
+      <th>Action</th>
+    </tr>
+    {% for a in assignments %}
+    <tr>
+      <td>{{ a.id }}</td>
+      <td>{{ a.title }}</td>
+      <td>{{ a.language }}</td>
+      <td>
+        <a href="#">Open</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+{% endif %}
 {% endblock %}
