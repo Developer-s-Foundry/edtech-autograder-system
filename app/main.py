@@ -9,6 +9,11 @@ from app.routers.instructor_assignments import router as instructor_assignments_
 from app.routers.web_instructor_assignments import router as web_instructor_assignments_router
 from app.routers.instructor_io_tests import router as instructor_io_tests_router
 from app.routers.web_instructor_io_tests import router as web_instructor_io_tests_router
+from app.routers.instructor_unit_tests import router as instructor_unit_tests_router
+from app.routers.web_instructor_unit_tests import router as web_instructor_unit_tests_router
+
+
+
 
 settings = get_settings()
 setup_logging(settings.log_level)
@@ -24,3 +29,7 @@ app.include_router(web_instructor_assignments_router)
 app.include_router(instructor_assignments_router)
 app.include_router(instructor_io_tests_router)
 app.include_router(web_instructor_io_tests_router)
+app.include_router(instructor_unit_tests_router)
+app.include_router(web_instructor_unit_tests_router)
+
+
