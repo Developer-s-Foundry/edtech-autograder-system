@@ -5,23 +5,52 @@ from app.db import get_db
 from app.models.models import Assignment
 from app.schemas.assignment import StudentAssignmentOut
 from app.dependencies.auth import require_student
+from app.schemas.assignment import AssignmentOut
+from app.schemas.student_assignment import (
+    StudentAssignmentListOut,
+    StudentAssignmentDetailOut,
+)
 
 router = APIRouter(
     prefix="/student/assignments",
     tags=["student-assignments"],
 )
 
+@router.get("", response_model=list[StudentAssignmentListOut])
+def list_published_assignments(
+    db: Session = Depends(get_db),
+    student=Depends(require_student),
+):
+    return (
+        db.query(Assignment)
+        .filter(Assignment.is_published == True)  # noqa: E712
+        .order_by(Assignment.created_at.desc())
+        .all()
+    )
+
+
+@router.get("/{assignment_id}", response_model=StudentAssignmentDetailOut)
+def get_published_assignment_detail(
+    assignment_id: int,
+    db: Session = Depends(get_db),
+    student=Depends(require_student),
+):
+    assignment = (
+        db.query(Assignment)
+        .filter(Assignment.id == assignment_id)
+        .first()
+    )
+
+    if not assignment:
+        raise HTTPException(status_code=404, detail="Assignment not found")
+
+    if not assignment.is_published:
+        # Students must not see unpublished assignments
+        raise HTTPException(status_code=404, detail="Assignment not found")
+
+    return assignment
 
 @router.get("", response_model=list[StudentAssignmentOut])
-from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
-
-from app.db import get_db
-from app.dependencies.auth import require_student
-from app.models.models import Assignment
-from app.schemas.assignment import AssignmentOut
-
-router = APIRouter(prefix="/student/assignments", tags=["student-assignments"])
 
 
 @router.get("", response_model=list[AssignmentOut])
