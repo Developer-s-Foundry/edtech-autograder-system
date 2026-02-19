@@ -11,15 +11,12 @@ from app.routers.instructor_io_tests import router as instructor_io_tests_router
 from app.routers.web_instructor_io_tests import router as web_instructor_io_tests_router
 from app.routers.instructor_unit_tests import router as instructor_unit_tests_router
 from app.routers.web_instructor_unit_tests import router as web_instructor_unit_tests_router
+from app.routers.instructor_static_rules import router as instructor_static_rules_router
+from app.routers.web_instructor_static_rules import router as web_instructor_static_rules_router
+from app.routers.web_instructor_publish import router as web_instructor_publish_router
 from app.routers.student_assignments import router as student_assignments_router
 from app.routers.student_submissions import router as student_submissions_router
 from app.routers.student_results import router as student_results_router
-
-
-from app.routers.instructor_static_rules import router as instructor_static_rules_router
-from app.routers.web_instructor_static_rules import router as web_instructor_static_rules_router
-from app.routers.student_assignments import router as student_assignments_router
-from app.routers.web_instructor_publish import router as web_instructor_publish_router
 from app.routers.web_student_dashboard import router as web_student_dashboard_router
 
 
@@ -33,19 +30,16 @@ app.include_router(health_router)
 app.include_router(auth_router)
 app.include_router(auth_router, prefix="/auth")
 app.include_router(web_router)
-app.include_router(web_instructor_assignments_router)
 app.include_router(instructor_assignments_router)
+app.include_router(web_instructor_assignments_router)
 app.include_router(instructor_io_tests_router)
 app.include_router(web_instructor_io_tests_router)
 app.include_router(instructor_unit_tests_router)
 app.include_router(web_instructor_unit_tests_router)
+app.include_router(instructor_static_rules_router)
+app.include_router(web_instructor_static_rules_router)
+app.include_router(web_instructor_publish_router)
 app.include_router(student_assignments_router)
 app.include_router(student_submissions_router)
 app.include_router(student_results_router)
-app.include_router(instructor_static_rules_router)
-app.include_router(web_instructor_static_rules_router)
-app.include_router(student_assignments_router)
-app.include_router(web_instructor_publish_router)
 app.include_router(web_student_dashboard_router)
-
-
