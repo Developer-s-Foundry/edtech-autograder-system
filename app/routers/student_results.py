@@ -10,6 +10,11 @@ from app.schemas.submission import (
     SubmissionStatusOut,
     TestCaseResultOut,
 )
+from app.schemas.student_submission import (
+    StudentSubmissionOut, 
+    StudentSubmissionResultOut,
+)
+
 
 router = APIRouter(
     prefix="/student/submissions",
@@ -40,6 +45,90 @@ def _get_owned_submission(submission_id: int, student_id: int, db: Session) -> S
 
     return submission
 
+@router.get("/student/submissions/{submission_id}", response_model=StudentSubmissionOut)
+def get_submission_status(
+    submission_id: int,
+    db: Session = Depends(get_db),
+    student=Depends(require_student),
+):
+    submission = _get_owned_submission(db, submission_id, student.id)
+
+    return StudentSubmissionOut(
+        submission_id=submission.id,
+        assignment_id=submission.assignment_id,
+        status=submission.status,
+        created_at=submission.created_at.isoformat() if getattr(submission, "created_at", None) else None,
+        filename=submission.filename,
+    )
+
+
+@router.get("/student/submissions/{submission_id}/result", response_model=StudentSubmissionResultOut)
+def get_submission_result(
+    submission_id: int,
+    db: Session = Depends(get_db),
+    student=Depends(require_student),
+):
+    submission = _get_owned_submission(db, submission_id, student.id)
+
+    # If queued/running, return status only
+    if submission.status in ("queued", "running"):
+        return StudentSubmissionResultOut(
+            submission_id=submission.id,
+            status=submission.status,
+        )
+
+    # If failed, include safe error message only
+    if submission.status == "failed":
+        # prefer latest grading run error if available
+        error_msg = None
+
+        if submission.latest_grading_run_id:
+            gr = db.query(GradingRun).filter(GradingRun.id == submission.latest_grading_run_id).first()
+            if gr:
+                error_msg = gr.error_message
+
+        return StudentSubmissionResultOut(
+            submission_id=submission.id,
+            status=submission.status,
+            error_message=error_msg or "Grading failed.",
+        )
+
+    # If completed, show summary breakdown only (no hidden test details)
+    if submission.status == "completed":
+        gr = None
+
+        if submission.latest_grading_run_id:
+            gr = db.query(GradingRun).filter(GradingRun.id == submission.latest_grading_run_id).first()
+
+        # Placeholder-safe behavior: grading run missing but submission marked completed
+        if not gr:
+            return StudentSubmissionResultOut(
+                submission_id=submission.id,
+                status=submission.status,
+                score_total=0,
+                io_score=0,
+                unit_score=0,
+                static_score=0,
+                feedback_summary={"note": "Results unavailable yet (placeholder)."},
+                ai_feedback=None,
+            )
+
+        return StudentSubmissionResultOut(
+            submission_id=submission.id,
+            status=submission.status,
+            score_total=gr.score_total,
+            io_score=gr.io_score,
+            unit_score=gr.unit_score,
+            static_score=gr.static_score,
+            feedback_summary=gr.feedback_summary,  # should be safe summary JSON
+            ai_feedback=gr.ai_feedback,
+        )
+
+    # Unknown status safety
+    return StudentSubmissionResultOut(
+        submission_id=submission.id,
+        status=submission.status,
+    )
 
 @router.get("/{submission_id}", response_model=SubmissionStatusOut)
 def get_submission_status(
