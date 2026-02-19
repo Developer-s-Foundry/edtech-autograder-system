@@ -115,6 +115,8 @@ class Settings(BaseSettings):
     app_name: str = Field(default="EdTech Autograder", alias="APP_NAME")
     env: str = Field(default="dev", alias="ENV")
     log_level: str = Field(default="INFO", alias="LOG_LEVEL")
+    max_upload_bytes: int = Field(default=1_000_000, alias="MAX_UPLOAD_BYTES")
+
 
     # Database
     database_url: str = Field(..., alias="DATABASE_URL")
