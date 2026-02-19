@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Submission Status</h2>
+
+<ul>
+  <li><b>Submission ID:</b> {{ submission.submission_id }}</li>
+  <li><b>Assignment ID:</b> {{ submission.assignment_id }}</li>
+  <li><b>Status:</b> {{ submission.status }}</li>
+  {% if submission.filename %}
+  <li><b>File:</b> {{ submission.filename }}</li>
+  {% endif %}
+</ul>
+
+<p>
+  <a href="/web/student/submissions/{{ submission.submission_id }}/result">View Result</a>
+</p>
+
+<p><a href="/web/student/dashboard">Back to Dashboard</a></p>
+{% endblock %}

@@ -12,6 +12,13 @@
   </div>
 {% endif %}
 
+{% if result %}
+  <p>
+    <a href="/web/student/submissions/{{ result.submission_id }}">View Status</a> |
+    <a href="/web/student/submissions/{{ result.submission_id }}/result">View Result</a>
+  </p>
+{% endif %}
+
 <form method="post" enctype="multipart/form-data">
   <label>Upload .py file (max 1MB)</label>
   <input type="file" name="file" accept=".py" required />
