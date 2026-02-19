@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Static Rules - Assignment {{ assignment_id }}</h2>
+
+{% if error %}
+  <div class="error">{{ error }}</div>
+{% endif %}
+
+<form method="post" action="/web/instructor/assignments/{{ assignment_id }}/static-rules">
+  <label>Static rules (JSON)</label>
+  <textarea name="json_text" rows="14" style="width: 100%;">{{ json_text }}</textarea>
+  <button type="submit">Save Static Rules</button>
+</form>
+
+<hr />
+
+<h3>Saved Static Rules</h3>
+
+{% if not rule %}
+  <p class="muted">No static rules saved yet.</p>
+{% else %}
+  <pre style="white-space: pre-wrap;">{{ rule | tojson(indent=2) }}</pre>
+{% endif %}
+
+<p><a href="/web/instructor/dashboard">Back to Dashboard</a></p>
+{% endblock %}
