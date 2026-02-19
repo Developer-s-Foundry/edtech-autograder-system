@@ -50,8 +50,6 @@ def get_published_assignment_detail(
 
     return assignment
 
-@router.get("", response_model=list[StudentAssignmentOut])
-
 
 @router.get("", response_model=list[AssignmentOut])
 def list_published_assignments(
