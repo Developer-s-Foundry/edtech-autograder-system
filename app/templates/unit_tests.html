@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Unit Test Spec - Assignment {{ assignment_id }}</h2>
+
+{% if error %}
+  <div class="error">{{ error }}</div>
+{% endif %}
+
+<form method="post" action="/web/instructor/assignments/{{ assignment_id }}/unit-tests">
+  <label>Name</label>
+  <input name="name" required value="{{ spec.name if spec else '' }}" />
+
+  <label>Assert-based test code</label>
+  <textarea name="test_code" rows="10" required>{{ spec.test_code if spec else '' }}</textarea>
+
+  <label>Points</label>
+  <input name="points" type="number" min="0" value="{{ spec.points if spec else 0 }}" />
+
+  <label>Hidden</label>
+  <select name="is_hidden">
+    <option value="true" {% if not spec or spec.is_hidden %}selected{% endif %}>true</option>
+    <option value="false" {% if spec and not spec.is_hidden %}selected{% endif %}>false</option>
+  </select>
+
+  <button type="submit">Save Unit Test Spec</button>
+</form>
+
+<hr />
+
+<h3>Saved Unit Test Spec</h3>
+
+{% if not spec %}
+  <p class="muted">No unit test spec saved yet. Create one above.</p>
+{% else %}
+  <table>
+    <tr>
+      <th>ID</th>
+      <td>{{ spec.id }}</td>
+    </tr>
+    <tr>
+      <th>Name</th>
+      <td>{{ spec.name }}</td>
+    </tr>
+    <tr>
+      <th>Points</th>
+      <td>{{ spec.points }}</td>
+    </tr>
+    <tr>
+      <th>Hidden</th>
+      <td>{{ spec.is_hidden }}</td>
+    </tr>
+  </table>
+
+  <h4>Test Code</h4>
+  <pre style="white-space: pre-wrap;">{{ spec.test_code }}</pre>
+{% endif %}
+
+<p><a href="/web/instructor/dashboard">Back to Dashboard</a></p>
+{% endblock %}
