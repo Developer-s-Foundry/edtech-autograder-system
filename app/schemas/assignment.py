@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel, Field, ConfigDict, model_validator
 from typing import Optional
 
@@ -64,3 +66,23 @@ class AssignmentOut(AssignmentBase):
 
     id: int
     instructor_id: int
+
+
+class StudentAssignmentOut(BaseModel):
+    """
+    Stripped-down assignment view for students.
+    Excludes: instructor_id, is_published, max_runtime_ms, max_memory_kb,
+    and all test case / grading rule definitions.
+    """
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    title: str
+    description: str
+    instructions: Optional[str]
+    language: str
+    weight_io: int
+    weight_unit: int
+    weight_static: int
+    created_at: datetime
+    updated_at: datetime
