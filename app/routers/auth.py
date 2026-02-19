@@ -1,11 +1,15 @@
 from __future__ import annotations
 
+import logging
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from jose import JWTError
 from sqlalchemy.orm import Session
 
 from app.db import get_db
+
+logger = logging.getLogger(__name__)
 from app.dependencies.auth import get_current_active_user
 from app.models.models import User
 from app.schemas.auth import (
@@ -64,8 +68,14 @@ def login(
     db: Session = Depends(get_db),
 ):
     """Authenticate with email (as username) + password, receive JWT tokens."""
+    logger.info(
+        "Login attempt: username=%r, password_len=%d",
+        form_data.username,
+        len(form_data.password) if form_data.password else 0,
+    )
     user = authenticate_user(db, form_data.username, form_data.password)
     if user is None:
+        logger.warning("Login failed for username=%r (user not found or wrong password)", form_data.username)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password",

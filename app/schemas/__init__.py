@@ -5,6 +5,11 @@ from .auth import (
     AccessTokenResponse,
     TokenRefreshRequest,
 )
+from .assignment import (
+    AssignmentCreate,
+    AssignmentResponse,
+    AssignmentUpdate,
+)
 
 __all__ = [
     "UserRegisterRequest",
@@ -12,4 +17,7 @@ __all__ = [
     "TokenResponse",
     "AccessTokenResponse",
     "TokenRefreshRequest",
+    "AssignmentCreate",
+    "AssignmentResponse",
+    "AssignmentUpdate",
 ]

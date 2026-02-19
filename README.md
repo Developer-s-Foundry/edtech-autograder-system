@@ -1,6 +1,6 @@
 
 # EdTech Autograder System
-**Required Python Version: 3.10+**
+**Required Python Version: 3.10, 3.11, or 3.12** (avoid 3.13+ for now; many dependencies lack pre-built wheels and will try to build from source, which requires Xcode Command Line Tools on macOS)
 
 
 A scalable, asynchronous autograder platform for programming assignments built with **FastAPI, Celery, Redis, PostgreSQL, React, and Judge0**.
