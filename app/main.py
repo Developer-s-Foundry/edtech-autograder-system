@@ -13,6 +13,10 @@ from app.routers.instructor_unit_tests import router as instructor_unit_tests_ro
 from app.routers.web_instructor_unit_tests import router as web_instructor_unit_tests_router
 from app.routers.instructor_static_rules import router as instructor_static_rules_router
 from app.routers.web_instructor_static_rules import router as web_instructor_static_rules_router
+from app.routers.student_assignments import router as student_assignments_router
+from app.routers.web_instructor_publish import router as web_instructor_publish_router
+from app.routers.web_student_dashboard import router as web_student_dashboard_router
+
 
 settings = get_settings()
 setup_logging(settings.log_level)
@@ -32,4 +36,8 @@ app.include_router(instructor_unit_tests_router)
 app.include_router(web_instructor_unit_tests_router)
 app.include_router(instructor_static_rules_router)
 app.include_router(web_instructor_static_rules_router)
+app.include_router(student_assignments_router)
+app.include_router(web_instructor_publish_router)
+app.include_router(web_student_dashboard_router)
+
 
