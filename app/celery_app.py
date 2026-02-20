@@ -4,13 +4,17 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", CELERY_BROKER_URL)
+
 celery_app = Celery(
     "autograder",
-    broker=os.getenv("CELERY_BROKER_URL"),
-    backend=os.getenv("CELERY_RESULT_BACKEND"),
+    broker=CELERY_BROKER_URL,
+    backend=CELERY_RESULT_BACKEND,
+    include=[
+        "app.tasks.grading",
+    ],
 )
-
-celery_app.autodiscover_tasks(["app"])
 
 celery_app.conf.update(
     task_serializer="json",

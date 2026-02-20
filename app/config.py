@@ -102,7 +102,6 @@ from typing import Optional
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -126,9 +125,16 @@ class Settings(BaseSettings):
     celery_broker_url: Optional[str] = Field(default=None, alias="CELERY_BROKER_URL")
     celery_result_backend: Optional[str] = Field(default=None, alias="CELERY_RESULT_BACKEND")
 
-    # Judge0 (later)
-    judge0_base_url: Optional[str] = Field(default=None, alias="JUDGE0_BASE_URL")
-    judge0_api_key: Optional[str] = Field(default=None, alias="JUDGE0_API_KEY")
+    # Judge0
+    judge0_base_url: str = Field(..., alias="JUDGE0_BASE_URL")
+    judge0_api_key: str | None = Field(default=None, alias="JUDGE0_API_KEY")
+    judge0_rapidapi_host: str | None = Field(default=None, alias="JUDGE0_RAPIDAPI_HOST")
+
+    judge0_language_id: int = Field(default=71, alias="JUDGE0_LANGUAGE_ID")
+
+    judge0_poll_timeout_seconds: int = Field(default=15, alias="JUDGE0_POLL_TIMEOUT_SECONDS")
+    judge0_poll_interval_seconds: float = Field(default=0.8, alias="JUDGE0_POLL_INTERVAL_SECONDS")
+    judge0_poll_max_interval_seconds: float = Field(default=2.0, alias="JUDGE0_POLL_MAX_INTERVAL_SECONDS")
 
     # JWT / Auth
     jwt_secret_key: str = Field(..., alias="JWT_SECRET_KEY")

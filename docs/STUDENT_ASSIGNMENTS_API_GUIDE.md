@@ -48,6 +48,7 @@ curl -s -X POST http://127.0.0.1:8000/auth/login \
   | python -m json.tool
 ```
 
+
 Copy the `access_token` from the response.
 
 ---
