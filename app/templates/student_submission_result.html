@@ -36,6 +36,44 @@
       <li><b>memory:</b> {{ result.feedback_summary.execution.memory }}</li>
     </ul>
   {% endif %}
+
+  {% if result.feedback_summary and result.feedback_summary.io %}
+    <h3>IO Grading</h3>
+    <p>
+      <b>IO Score:</b> {{ result.feedback_summary.io.io_score }}
+      / {{ result.feedback_summary.io.io_points_possible }}
+    </p>
+
+    <p>
+      <b>Tests:</b> {{ result.feedback_summary.io.total_tests }}
+      (Visible: {{ result.feedback_summary.io.visible_tests }},
+      Hidden: {{ result.feedback_summary.io.hidden_tests }})
+    </p>
+
+    {% if result.feedback_summary.io.visible_breakdown %}
+        <h4>Visible Test Breakdown</h4>
+        <table>
+          <tr>
+            <th>Name</th>
+            <th>Passed</th>
+            <th>Points</th>
+            <th>Status</th>
+          </tr>
+          {% for t in result.feedback_summary.io.visible_breakdown %}
+          <tr>
+            <td>{{ t.name }}</td>
+            <td>{{ t.passed }}</td>
+            <td>{{ t.points_awarded }}</td>
+            <td>{{ t.status }}</td>
+          </tr>
+          {% endfor %}
+        </table>
+      {% endif %}
+    {% endif %}
+
+
+
+
   
   {% if result.ai_feedback %}
     <h3>AI Feedback</h3>
