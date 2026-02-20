@@ -1,42 +1,62 @@
-# import logging
-
-# from app.celery_app import celery_app
-
-# logger = logging.getLogger(__name__)
-
-# @celery_app.task(name="app.tasks.grading.grade_submission", bind=True, max_retries=3)
-# def grade_submission(self, submission_id: int) -> None:
-#     """
-#     Celery task: grade a student submission.
-
-#     Phase 1 stub — Judge0 integration is wired in Ticket 5.1.
-#     This task is enqueued immediately after a submission is created
-#     so the queue infrastructure is validated end-to-end now.
-#     """
-#     logger.info("grade_submission task received: submission_id=%s", submission_id)
-#     return {"submission_id": submission_id, "status": "queued"}
-#     # TODO (Ticket 5.1): fetch submission from DB, call Judge0, store results
-
-
-# app/tasks/grading.py
+# # app/tasks/grading.py
 from __future__ import annotations
+
+import math
+from typing import Optional
 
 from sqlalchemy.orm import Session
 
 from app.celery_app import celery_app
 from app.db import SessionLocal
-from app.models.models import Submission, GradingRun, SubmissionStatus, GradingRunStatus
+from app.models.models import (
+    Assignment,
+    IOTestCase,
+    Submission,
+    GradingRun,
+    TestCaseResult,
+    SubmissionStatus,
+    GradingRunStatus,
+)
 from app.services.judge0_client import submit_code, poll_result
+
+
+def _normalize_output(s: Optional[str]) -> str:
+    """
+    Normalize stdout and expected output:
+    - handle None
+    - normalize line endings
+    - strip surrounding whitespace
+    """
+    if not s:
+        return ""
+    s = s.replace("\r\n", "\n").replace("\r", "\n")
+    return s.strip()
+
+
+def _seconds_to_ms(time_value) -> Optional[int]:
+    """
+    Judge0 often returns time as string seconds e.g. "0.012"
+    """
+    if time_value is None:
+        return None
+    try:
+        sec = float(time_value)
+        return int(math.floor(sec * 1000))
+    except (ValueError, TypeError):
+        return None
 
 
 @celery_app.task
 def grade_submission(submission_id: int):
     """
-    Placeholder execution task:
-    - marks submission running
-    - runs code on Judge0 (no tests yet)
-    - stores Judge0 output into GradingRun.feedback_summary["execution"]
-    - updates status completed/failed
+    Ticket 5.3 - IO grading only.
+
+    For each IO test case:
+    - execute student code with test stdin
+    - poll until done or timeout
+    - compare stdout to expected stdout (normalized)
+    - store TestCaseResult
+    - accumulate io_score
     """
     db: Session = SessionLocal()
     try:
@@ -44,7 +64,13 @@ def grade_submission(submission_id: int):
         if not submission:
             return {"ok": False, "error": "Submission not found"}
 
-        # Create grading run (placeholder)
+        assignment = db.query(Assignment).filter(Assignment.id == submission.assignment_id).first()
+        if not assignment:
+            submission.status = SubmissionStatus.failed.value
+            db.commit()
+            return {"ok": False, "error": "Assignment not found"}
+
+        # Create grading run
         gr = GradingRun(
             submission_id=submission.id,
             status=GradingRunStatus.running.value,
@@ -53,41 +79,132 @@ def grade_submission(submission_id: int):
         db.commit()
         db.refresh(gr)
 
-        # Point submission to latest run and set running
+        # Link submission to latest run + mark running
         submission.latest_grading_run_id = gr.id
         submission.status = SubmissionStatus.running.value
         db.commit()
 
-        # Execute on Judge0 (placeholder stdin None)
-        token = submit_code(submission.code_text, stdin=None)
-        result = poll_result(token)
+        # Fetch IO test cases for assignment (independent execution per case)
+        test_cases = (
+            db.query(IOTestCase)
+            .filter(IOTestCase.assignment_id == assignment.id)
+            .order_by(IOTestCase.order_index.asc(), IOTestCase.id.asc())
+            .all()
+        )
 
-        # Store safe execution result (no hidden test details)
-        gr.status = GradingRunStatus.completed.value if result.get("status") != "failed" else GradingRunStatus.failed.value
-        gr.feedback_summary = {
-            "execution": result,
-            "note": "Placeholder execution only. Grading logic not applied yet.",
-        }
+        total_points_possible = sum(tc.points for tc in test_cases)
+        io_score = 0
 
-        # Placeholder scoring until grading logic:
-        gr.io_score = 0
+        # Breakdown summary (do not expose expected outputs)
+        visible_case_summaries = []
+        hidden_total = 0
+        hidden_passed = 0
+        hidden_points_awarded = 0
+
+        for tc in test_cases:
+            stdin = tc.stdin if tc.stdin is not None else None
+
+            token = None
+            result = None
+
+            try:
+                token = submit_code(submission.code_text, stdin=stdin)
+                result = poll_result(token)
+            except Exception as e:
+                # Controlled failure for this test only
+                result = {
+                    "stdout": "",
+                    "stderr": f"Execution failed: {e}",
+                    "status": "failed",
+                    "time": None,
+                    "memory": None,
+                }
+
+            student_stdout_raw = result.get("stdout") or ""
+            student_stderr_raw = result.get("stderr") or ""
+            exec_status = result.get("status") or "Unknown"
+
+            student_stdout_norm = _normalize_output(student_stdout_raw)
+            expected_norm = _normalize_output(tc.expected_stdout)
+
+            passed = (exec_status != "failed") and (student_stdout_norm == expected_norm)
+            points_awarded = tc.points if passed else 0
+
+            # store per-test result
+            tcr = TestCaseResult(
+                grading_run_id=gr.id,
+                io_test_case_id=tc.id,
+                passed=passed,
+                points_awarded=points_awarded,
+                stdout=student_stdout_raw,
+                stderr=student_stderr_raw,
+                status=exec_status,
+                time_ms=_seconds_to_ms(result.get("time")),
+                memory_kb=result.get("memory"),
+            )
+            db.add(tcr)
+
+            io_score += points_awarded
+
+            # Summaries: hide hidden tests details
+            if tc.is_hidden:
+                hidden_total += 1
+                if passed:
+                    hidden_passed += 1
+                hidden_points_awarded += points_awarded
+            else:
+                visible_case_summaries.append(
+                    {
+                        "test_case_id": tc.id,
+                        "name": tc.name,
+                        "passed": passed,
+                        "points_awarded": points_awarded,
+                        "status": exec_status,
+                        "time_ms": _seconds_to_ms(result.get("time")),
+                        "memory_kb": result.get("memory"),
+                    }
+                )
+
+        # Commit all test case results
+        db.commit()
+
+        # Update grading run scores (unit/static still placeholders)
+        gr.io_score = io_score
         gr.unit_score = 0
         gr.static_score = 0
-        gr.score_total = 0
+        gr.score_total = gr.io_score + gr.unit_score + gr.static_score
 
-        if result.get("status") == "failed":
-            gr.error_message = result.get("stderr") or "Execution failed"
-            submission.status = SubmissionStatus.failed.value
-        else:
-            submission.status = SubmissionStatus.completed.value
+        # Store IO summary in grading run (safe, no expected output)
+        gr.feedback_summary = {
+            "io": {
+                "io_score": io_score,
+                "io_points_possible": total_points_possible,
+                "total_tests": len(test_cases),
+                "visible_tests": len(visible_case_summaries),
+                "hidden_tests": hidden_total,
+                "hidden_passed": hidden_passed,
+                "hidden_points_awarded": hidden_points_awarded,
+                "visible_breakdown": visible_case_summaries,
+            },
+            "note": "IO grading complete. Unit and static grading not enabled yet.",
+        }
+
+        gr.status = GradingRunStatus.completed.value
+        submission.status = SubmissionStatus.completed.value
 
         db.commit()
         db.refresh(gr)
 
-        return {"ok": True, "submission_id": submission.id, "status": submission.status}
+        return {
+            "ok": True,
+            "submission_id": submission.id,
+            "io_score": io_score,
+            "total_points_possible": total_points_possible,
+            "status": submission.status,
+        }
 
     except Exception as e:
-        # Never crash the worker; mark failed if possible
+        # Do not crash worker. Mark failed.
         try:
             submission = db.query(Submission).filter(Submission.id == submission_id).first()
             if submission:
