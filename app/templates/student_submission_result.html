@@ -21,11 +21,22 @@
     <li>Static: {{ result.static_score }}</li>
   </ul>
 
-  {% if result.feedback_summary %}
-    <h3>Feedback Summary</h3>
-    <pre style="white-space: pre-wrap;">{{ result.feedback_summary | tojson(indent=2) }}</pre>
-  {% endif %}
+  {% if result.feedback_summary and result.feedback_summary.execution %}
+    <h3>Judge0 Execution Output</h3>
+    <p><b>Status:</b> {{ result.feedback_summary.execution.status }}</p>
 
+    <p><b>stdout</b></p>
+    <pre style="white-space: pre-wrap;">{{ result.feedback_summary.execution.stdout }}</pre>
+
+    <p><b>stderr</b></p>
+    <pre style="white-space: pre-wrap;">{{ result.feedback_summary.execution.stderr }}</pre>
+
+    <ul>
+      <li><b>time:</b> {{ result.feedback_summary.execution.time }}</li>
+      <li><b>memory:</b> {{ result.feedback_summary.execution.memory }}</li>
+    </ul>
+  {% endif %}
+  
   {% if result.ai_feedback %}
     <h3>AI Feedback</h3>
     <pre style="white-space: pre-wrap;">{{ result.ai_feedback }}</pre>

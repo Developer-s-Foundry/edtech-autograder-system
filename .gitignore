@@ -6,6 +6,9 @@ __pycache__/
 venv/
 env/
 .env
+test_judge0.py
+solution.py
+
 # C extensions
 *.so
 
