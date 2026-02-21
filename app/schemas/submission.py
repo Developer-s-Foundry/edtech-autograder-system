@@ -1,6 +1,5 @@
 from datetime import datetime
 from typing import Optional
-
 from pydantic import BaseModel, ConfigDict
 
 
@@ -74,6 +73,8 @@ class GradingResultOut(BaseModel):
     io_score: Optional[int] = None
     unit_score: Optional[int] = None
     static_score: Optional[int] = None
+    unit_total_points: int = 0
+    unit_assert_count: int = 0
     feedback_summary: Optional[dict] = None
     ai_feedback: Optional[str] = None
     io_results: Optional[list[TestCaseResultOut]] = None

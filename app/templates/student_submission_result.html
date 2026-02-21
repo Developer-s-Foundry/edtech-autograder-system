@@ -72,7 +72,13 @@
     {% endif %}
 
 
+    <h3>Unit Test Grading</h3>
+    <p><b>Unit Test Score:</b>
+      {{ result.unit_score}} / {{ result.unit_total_points }}</p>
 
+      {% if result.unit_assert_count %}
+        <p class="muted">Asserts:{{ result.unit_assert_count }}</p>
+      {% endif %}
 
   
   {% if result.ai_feedback %}
