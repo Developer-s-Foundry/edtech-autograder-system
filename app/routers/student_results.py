@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session, joinedload
-
+from typing import Optional
 from app.db import get_db
 from app.dependencies.auth import require_student
-from app.models.models import GradingRun, Submission
+from app.models.models import GradingRun, Submission, UnitTestSpec
 from app.schemas.submission import (
     GradingResultOut,
     StaticAnalysisOut,
@@ -61,6 +61,19 @@ def get_submission_status(
         filename=submission.filename,
     )
 
+### newly added function
+def _count_asserts(test_code: Optional[str]) -> int:
+    if not test_code:
+        return 0
+    count = 0
+    for line in test_code.splitlines():
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        if stripped.startswith("assert"):
+            count += 1
+        return count
+
 
 @router.get("/student/submissions/{submission_id}/result", response_model=StudentSubmissionResultOut)
 def get_submission_result(
@@ -100,6 +113,20 @@ def get_submission_result(
         if submission.latest_grading_run_id:
             gr = db.query(GradingRun).filter(GradingRun.id == submission.latest_grading_run_id).first()
 
+        ## New additional for Unit total and assert count
+        unit_total_points = 0
+        unit_assert_count = 0
+
+        unit_spec = (
+            db.query(UnitTestSpec)
+            .filter(UnitTestSpec.assignment_id == submission.assignment_id)
+            .first()
+        )
+        
+        if unit_spec and unit_spec.points is not None:
+            unit_total_points = unit_spec.points
+            unit_assert_count = _count_asserts(unit_spec.test_code)
+
         # Placeholder-safe behavior: grading run missing but submission marked completed
         if not gr:
             return StudentSubmissionResultOut(
@@ -109,9 +136,11 @@ def get_submission_result(
                 io_score=0,
                 unit_score=0,
                 static_score=0,
+                unit_total_points=unit_total_points,
                 feedback_summary={"note": "Results unavailable yet (placeholder)."},
                 ai_feedback=None,
             )
+        
 
         return StudentSubmissionResultOut(
             submission_id=submission.id,
@@ -120,6 +149,8 @@ def get_submission_result(
             io_score=gr.io_score,
             unit_score=gr.unit_score,
             static_score=gr.static_score,
+            unit_total_points=unit_total_points, # newly added
+            unit_assert_count=unit_assert_count, # newly added
             feedback_summary=gr.feedback_summary,  # should be safe summary JSON
             ai_feedback=gr.ai_feedback,
         )
@@ -178,6 +209,20 @@ def get_submission_result(
         )
 
     # Grading finished (completed or failed) — load the latest grading run
+    ## New additional for Unit total and assert count
+    unit_total_points = 0
+    unit_assert_count = 0
+
+    unit_spec = (
+        db.query(UnitTestSpec)
+        .filter(UnitTestSpec.assignment_id == submission.assignment_id)
+        .first()
+    )
+        
+    if unit_spec and unit_spec.points is not None:
+        unit_total_points = unit_spec.points
+        unit_assert_count = _count_asserts(unit_spec.test_code)
+
     run = (
         db.query(GradingRun)
         .options(
@@ -229,6 +274,8 @@ def get_submission_result(
         io_score=run.io_score,
         unit_score=run.unit_score,
         static_score=run.static_score,
+        unit_total_points=unit_total_points, # newly added
+        unit_assert_count=unit_assert_count, # newly added
         feedback_summary=run.feedback_summary,
         ai_feedback=run.ai_feedback,
         io_results=io_results,

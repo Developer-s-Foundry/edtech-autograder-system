@@ -19,6 +19,8 @@ class StudentSubmissionResultOut(BaseModel):
     io_score: Optional[int] = None
     unit_score: Optional[int] = None
     static_score: Optional[int] = None
+    unit_total_points: int = 0
+    unit_assert_count: int = 0
 
     feedback_summary: Optional[Any] = None
     ai_feedback: Optional[str] = None

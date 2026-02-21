@@ -11,6 +11,7 @@ from app.db import SessionLocal
 from app.models.models import (
     Assignment,
     IOTestCase,
+    UnitTestSpec,
     Submission,
     GradingRun,
     TestCaseResult,
@@ -44,6 +45,34 @@ def _seconds_to_ms(time_value) -> Optional[int]:
         return int(math.floor(sec * 1000))
     except (ValueError, TypeError):
         return None
+
+
+def _indent_asserts(assert_block: str) -> str:
+    lines = (assert_block or "").strip().splitlines()
+    cleaned = [ln.strip() for ln in lines if ln.strip()]
+    if not cleaned:
+        return "    pass"
+    return "\n".join("    " + ln for ln in cleaned)
+
+def _build_unit_harness(student_code: str, instructor_asserts: str) -> str:
+    indented = _indent_asserts(instructor_asserts)
+
+    # IMPORTANT: no f-strings in this template
+    return (
+        "globals()['__name__'] = '__unit_test__'\n"
+        + student_code
+        + "\n\n"
+        + "def __run_unit_tests():\n"
+        + indented
+        + "\n\n"
+        + "try:\n"
+        + "    __run_unit_tests()\n"
+        + "    print('UNIT_TESTS_PASSED')\n"
+        + "except AssertionError:\n"
+        + "    print('UNIT_TESTS_FAILED: AssertionError')\n"
+        + "except Exception as e:\n"
+        + "    print('UNIT_TESTS_FAILED: ' + type(e).__name__)\n"
+    )
 
 
 @celery_app.task
@@ -165,16 +194,83 @@ def grade_submission(submission_id: int):
                     }
                 )
 
+        # ---------------------------
+        # UNIT TEST GRADING
+        # ---------------------------
+
+        unit_score = 0
+        unit_summary = None
+
+        unit_spec = (
+            db.query(UnitTestSpec)
+            .filter(UnitTestSpec.assignment_id == assignment.id)
+            .first()
+        )
+
+        if unit_spec:
+
+            harness_code = _build_unit_harness(
+                submission.code_text,
+                unit_spec.test_code
+            )
+
+            try:
+                token = submit_code(harness_code)
+                result = poll_result(token)
+
+                stdout = (result.get("stdout") or "").strip()
+                stderr = (result.get("stderr") or "").strip()
+                status = result.get("status")
+
+                execution_status = status.get("description") if isinstance(status, dict) else status
+
+                passed = False
+                failure_summary = None
+
+                if "UNIT_TESTS_PASSED" in stdout:
+                    passed = True
+                    unit_score = unit_spec.points
+                else:
+                    passed = False
+
+                    # Summarize failure safely
+                    if "AssertionError" in stdout:
+                        failure_summary = "Assertion failed"
+                    elif "SyntaxError" in stderr:
+                        failure_summary = "Syntax error"
+                    elif stderr:
+                        failure_summary = stderr.splitlines()[-1]
+                    else:
+                        failure_summary = "Unit tests failed"
+
+                unit_summary = {
+                    "passed": passed,
+                    "points_awarded": unit_score,
+                    "points_possible": unit_spec.points,
+                    "execution_status": execution_status,
+                    "failure_summary": failure_summary,
+                }
+
+            except Exception as e:
+                unit_summary = {
+                    "passed": False,
+                    "points_awarded": 0,
+                    "points_possible": unit_spec.points,
+                    "execution_status": "error",
+                    "failure_summary": "Execution error",
+                }
+                unit_score = 0        
+        
         # Commit all test case results
         db.commit()
 
         # Update grading run scores (unit/static still placeholders)
         gr.io_score = io_score
-        gr.unit_score = 0
+        gr.unit_score = unit_score
         gr.static_score = 0
         gr.score_total = gr.io_score + gr.unit_score + gr.static_score
 
-        # Store IO summary in grading run (safe, no expected output)
+        # Store IO, Unit, and Static summary in grading run (safe, no expected output)
         gr.feedback_summary = {
             "io": {
                 "io_score": io_score,
@@ -186,7 +282,9 @@ def grade_submission(submission_id: int):
                 "hidden_points_awarded": hidden_points_awarded,
                 "visible_breakdown": visible_case_summaries,
             },
-            "note": "IO grading complete. Unit and static grading not enabled yet.",
+            "unit": unit_summary,
+
+            "note": "IO & UNIT grading complete. Static grading not enabled yet.",
         }
 
         gr.status = GradingRunStatus.completed.value
@@ -199,7 +297,11 @@ def grade_submission(submission_id: int):
             "ok": True,
             "submission_id": submission.id,
             "io_score": io_score,
-            "total_points_possible": total_points_possible,
+            "io_total_points_possible": total_points_possible,
+            "unit_score": unit_score,
+            "unit_total_points_possible": unit_spec.points,
+            "static_score": 0,
+            "total_score": io_score + unit_score + 0,
             "status": submission.status,
         }
 
